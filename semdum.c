@@ -4,6 +4,20 @@
 # include "sem.h"
 # include "sym.h"
 
+#define MAXLINES 80
+
+int labelnum = 0;
+static char quadbuf[4096];
+
+// The following are declared in semutil.c
+extern int formalnum;                  /* number of formal arguments */
+extern char formaltypes[];             /* types of formal arguments  */
+extern char formalnames[][MAXLINES];   /* names of formal arguments  */
+extern int localnum;                   /* number of local variables  */
+extern char localtypes[];              /* types of local variables   */
+extern char localnames[][MAXLINES];    /* names of local variables   */
+extern int localwidths[];              /* widths of local variables  */
+
 /*
  * backpatch - backpatch list of quadruples starting at p with k
  */
@@ -171,7 +185,23 @@ struct sem_rec *exprs(struct sem_rec *l, struct sem_rec *e)
  */
 void fhead(struct id_entry *p)
 {
-   fprintf(stderr, "sem: fhead not implemented\n");
+    sprintf(quadbuf, "func %s %d\n", p->i_name, p->i_type);
+    fprintf(stdout, "%s", quadbuf);
+    int i;
+    for (i = 0; i < formalnum; i++) {
+        int type = formaltypes[i] == 'i' ? T_INT : T_DOUBLE;
+        int width = type == T_INT ? 4 : 8;
+        sprintf(quadbuf, "formal %s %d %d\n", formalnames[i], type, width);
+        fprintf(stdout, "%s", quadbuf);
+    }
+    for (i = 0; i < localnum; i++) {
+        int type = localtypes[i] == 'i' ? T_INT : T_DOUBLE;
+        if (localwidths[i] > 1)
+            type |= T_ARRAY;
+        int width = (type & T_INT) ? 4 * localwidths[i] : 8 * localwidths[i];
+        sprintf(quadbuf, "localloc %s %d %d\n", localnames[i], type, width);
+        fprintf(stdout, "%s", quadbuf);
+    }
 }
 
 /*
@@ -179,8 +209,22 @@ void fhead(struct id_entry *p)
  */
 struct id_entry *fname(int t, char *id)
 {
-   fprintf(stderr, "sem: fname not implemented\n");
-   return ((struct id_entry *) NULL);
+   struct id_entry *p;
+
+   if ((p = lookup(id, 0)) == NULL) {
+       p = install(id, 0);
+   }
+   else if (p->i_defined)
+       yyerror("procedure is previously defined");
+   else if (p->i_type != t)
+       yyerror("procedure type does not match");
+
+   p->i_type = t;
+   p->i_scope = GLOBAL;
+   p->i_defined = 1;
+   localnum = formalnum = 0;
+   enterblock();
+   return p;
 }
 
 /*
@@ -196,8 +240,10 @@ void ftail()
  */
 struct sem_rec *id(char *x)
 {
-   fprintf(stderr, "sem: id not implemented\n");
-   return ((struct sem_rec *) NULL);
+    fprintf(stderr, "sem: id not implemented\n");
+    return ((struct sem_rec *) NULL);
+    struct id_entry *p = lookup(x, 0);
+    return node(labelnum, p->i_type|T_ADDR, 0, 0);
 }
 
 /*
@@ -224,7 +270,9 @@ void labeldcl(char *id)
 int m()
 {
    fprintf(stderr, "sem: m not implemented\n");
-   return (0);
+   labelnum++;
+   return labelnum;
+   //return (0);
 }
 
 /*
