@@ -31,7 +31,8 @@ void backpatch(struct sem_rec *p, int k)
  */
 void bgnstmt()
 {
-   fprintf(stderr, "sem: bgnstmt not implemented\n");
+   extern int lineno;
+   fprintf(stdout, "bgntstmt %d\n", lineno);
 }
 
 /*
