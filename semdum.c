@@ -1,4 +1,5 @@
 # include <stdio.h>
+# include <string.h>
 # include "cc.h"
 # include "semutil.h"
 # include "sem.h"
@@ -8,6 +9,8 @@
 
 int labelnum = 0;
 static char quadbuf[4096];
+int numlabels = 0;
+int numblabels = 0;
 
 // The following are declared in semutil.c
 extern int formalnum;                  /* number of formal arguments */
@@ -40,8 +43,11 @@ void bgnstmt()
  */
 struct sem_rec *call(char *f, struct sem_rec *args)
 {
-   fprintf(stderr, "sem: call not implemented\n");
-   return ((struct sem_rec *) NULL);
+    int quadnum = nexttemp();
+    sprintf(quadbuf, "t%d := global %s\n", quadnum, f);
+    printf("%s\n", quadbuf);
+
+    return ((struct sem_rec*) NULL);
 }
 
 /*
@@ -58,8 +64,16 @@ struct sem_rec *ccand(struct sem_rec *e1, int m, struct sem_rec *e2)
  */
 struct sem_rec *ccexpr(struct sem_rec *e)
 {
-   fprintf(stderr, "sem: ccexpr not implemented\n");
-   return ((struct sem_rec *) NULL);
+   //fprintf(stderr, "sem: ccexpr not implemented\n");
+   //return ((struct sem_rec *) NULL);
+
+   int trueLabel = ++numblabels;
+   int falseLabel = ++numblabels;
+   sprintf(quadbuf, "bt t%d B%d\n", e -> s_place, trueLabel);
+   fprintf(stdout, "%s", quadbuf);
+   sprintf(quadbuf, "br B%d\n", falseLabel);
+   fprintf(stdout, "%s", quadbuf);
+   return(node(0, 0, node(trueLabel, 0, NULL, NULL), node(falseLabel, 0, NULL, NULL)));
 }
 
 /*
@@ -85,8 +99,21 @@ struct sem_rec *ccor(struct sem_rec *e1, int m, struct sem_rec *e2)
  */
 struct sem_rec *con(char *x)
 {
-   fprintf(stderr, "sem: con not implemented\n");
-   return ((struct sem_rec *) NULL);
+   //fprintf(stderr, "sem: con not implemented\n");
+   //return ((struct sem_rec *) NULL);
+
+   struct id_entry *p;
+   if ((p = lookup(x, 0)) == NULL)
+   {
+       p = install(x, 0);
+       p -> i_type = T_INT;
+       p -> i_scope = GLOBAL;
+       p -> i_defined = 1;
+   }
+   int quadnum = nexttemp();
+   sprintf(quadbuf, "t%d := %s\n", quadnum, x);
+   fprintf(stdout, "%s", quadbuf);
+   return node(quadnum, p -> i_type, NULL, NULL);
 }
 
 /*
@@ -135,7 +162,12 @@ void dogoto(char *id)
  */
 void doif(struct sem_rec *e, int m1, int m2)
 {
-   fprintf(stderr, "sem: doif not implemented\n");
+   //fprintf(stderr, "sem: doif not implemented\n");
+    sprintf(quadbuf, "B%d=L%d\n", e-> back.s_link -> s_place, m1);
+    fprintf(stdout, "%s", quadbuf);
+    sprintf(quadbuf, "B%d=L%d\n", e-> s_false -> s_place, m2);
+    fprintf(stdout, "%s", quadbuf);
+    return;
 }
 
 /*
@@ -152,7 +184,10 @@ void doifelse(struct sem_rec *e, int m1, struct sem_rec *n,
  */
 void doret(struct sem_rec *e)
 {
-   fprintf(stderr, "sem: doret not implemented\n");
+   //fprintf(stderr, "sem: doret not implemented\n");
+   char type = tsize(e -> s_mode) == 4 ? 'i' : 'f';
+   sprintf(quadbuf, "ret%c t%d\n", type, e -> s_place);
+   fprintf(stdout, "%s", quadbuf);
 }
 
 /*
@@ -177,8 +212,10 @@ void endloopscope(int m)
  */
 struct sem_rec *exprs(struct sem_rec *l, struct sem_rec *e)
 {
-   fprintf(stderr, "sem: exprs not implemented\n");
-   return ((struct sem_rec *) NULL);
+    //printf("l->s_place: %d\ne->s_place: %d\n", l->s_place, e->s_place);
+    printf("argi t%d\n", l->s_place);
+    printf("argi t%d\n", e->s_place);
+    return ((struct sem_rec *) NULL);
 }
 
 /*
@@ -233,7 +270,9 @@ struct id_entry *fname(int t, char *id)
  */
 void ftail()
 {
-   fprintf(stderr, "sem: ftail not implemented\n");
+   //fprintf(stderr, "sem: ftail not implemented\n");
+    fprintf(stdout, "fend\n");
+    leaveblock();
 }
 
 /*
@@ -241,10 +280,28 @@ void ftail()
  */
 struct sem_rec *id(char *x)
 {
-    fprintf(stderr, "sem: id not implemented\n");
+    /*fprintf(stderr, "sem: id not implemented\n");
     return ((struct sem_rec *) NULL);
     struct id_entry *p = lookup(x, 0);
     return node(labelnum, p->i_type|T_ADDR, 0, 0);
+     */
+
+    struct id_entry *p;
+    if ((p = lookup(x, 0)) == NULL)
+    {
+        yyerror("undeclared identifier");
+    }
+    int quadnum = nexttemp();
+    if (p -> i_scope == GLOBAL)
+        sprintf(quadbuf, "t%d := global %s\n", quadnum, x);
+    else if (p -> i_scope == PARAM)
+        sprintf(quadbuf, "t%d := param %s %d\n", quadnum, x, p -> i_offset);
+    else if (p -> i_scope == LOCAL)
+        sprintf(quadbuf, "t%d := local %s %d\n", quadnum, x, p -> i_offset);
+
+    fprintf(stdout, "%s", quadbuf);
+    return (node(quadnum, p -> i_type|T_ADDR, NULL, NULL));
+
 }
 
 /*
@@ -270,10 +327,10 @@ void labeldcl(char *id)
  */
 int m()
 {
-   fprintf(stderr, "sem: m not implemented\n");
-   labelnum++;
-   return labelnum;
+   //fprintf(stderr, "sem: m not implemented\n");
    //return (0);
+   printf("label L%d\n", ++numlabels);
+   return numlabels;
 }
 
 /*
@@ -290,8 +347,21 @@ struct sem_rec *n()
  */
 struct sem_rec *op1(char *op, struct sem_rec *y)
 {
-   fprintf(stderr, "sem: op1 not implemented\n");
-   return ((struct sem_rec *) NULL);
+   if (*op == '@')
+   {
+       y -> s_mode &= ~T_ADDR;
+
+       int quadnum = nexttemp();
+       char type = y -> s_mode & T_INT ? 'i' : 'f';
+       sprintf(quadbuf, "t%d := @%c t%d\n", quadnum, type, y -> s_place);
+       fprintf(stdout, "%s", quadbuf);
+       return (node(quadnum, y -> s_mode, NULL, NULL));
+   }
+   else
+   {
+       fprintf(stderr, "sem: op1 not implemented\n");
+       return ((struct sem_rec *) NULL);
+   }
 }
 
 /*
@@ -299,8 +369,21 @@ struct sem_rec *op1(char *op, struct sem_rec *y)
  */
 struct sem_rec *op2(char *op, struct sem_rec *x, struct sem_rec *y)
 {
-   fprintf(stderr, "sem: op2 not implemented\n");
-   return ((struct sem_rec *) NULL);
+   if (*op == '+')
+   {
+       int quadnum = nexttemp();
+       char type = tsize(x -> s_mode) == 4 ? 'i' : 'f';
+       sprintf(quadbuf, "t%d = t%d +%c t%d\n", quadnum, x->s_place, type, y->s_place);
+       fprintf(stdout, "%s", quadbuf);
+       return node(quadnum, x -> s_mode, NULL, NULL);
+   }
+   else
+   {
+       fprintf(stderr, "sem: op2 not implemented\n");
+       return ((struct sem_rec *) NULL);
+   }
+
+
 }
 
 /*
@@ -317,8 +400,18 @@ struct sem_rec *opb(char *op, struct sem_rec *x, struct sem_rec *y)
  */
 struct sem_rec *rel(char *op, struct sem_rec *x, struct sem_rec *y)
 {
-   fprintf(stderr, "sem: rel not implemented\n");
-   return ((struct sem_rec *) NULL);
+    if (strcmp(op, ">") == 0)
+    {
+        char type = x -> s_mode & T_INT ? 'i' : 'f';
+        int quadnum = nexttemp();
+        sprintf(quadbuf, "t%d := t%d %s%c t%d\n", quadnum, x -> s_place, op, type, y -> s_place);
+        fprintf(stdout, "%s", quadbuf);
+        return ccexpr(node(quadnum, x -> s_mode, NULL, NULL));
+    }
+    else{
+        fprintf(stderr, "sem: rel not implemented\n");
+        return ((struct sem_rec *) NULL);
+    }
 }
 
 /*
@@ -326,8 +419,19 @@ struct sem_rec *rel(char *op, struct sem_rec *x, struct sem_rec *y)
  */
 struct sem_rec *set(char *op, struct sem_rec *x, struct sem_rec *y)
 {
-   fprintf(stderr, "sem: set not implemented\n");
-   return ((struct sem_rec *) NULL);
+    if (*op == '\0')
+    {
+        int quadnum = nexttemp();
+        char type = x -> s_mode & T_INT ? 'i' : 'f';
+        sprintf(quadbuf, "t%d := t%d = %c t%d\n", quadnum, x -> s_place, type, y -> s_place);
+        fprintf(stdout, "%s", quadbuf);
+        return node(quadnum, x -> s_mode, NULL, NULL);
+    }
+    else
+    {
+        fprintf(stderr, "sem: set not implemented\n");
+        return ((struct sem_rec *) NULL);
+    }
 }
 
 /*
@@ -344,6 +448,17 @@ void startloopscope()
  */
 struct sem_rec *string(char *s)
 {
-   fprintf(stderr, "sem: string not implemented\n");
-   return ((struct sem_rec *) NULL);
+    struct id_entry *p;
+    if ((p = lookup(s, 0)) == NULL)
+    {
+        p = install(s, 0);
+        p -> i_type = T_STR;
+        p -> i_scope = GLOBAL;
+        p -> i_defined = 1;
+    }
+    int quadnum = nexttemp();
+    sprintf(quadbuf, "t%d := %s\n", quadnum, s);
+    fprintf(stdout, "%s", quadbuf);
+    return node(quadnum, p->i_type, NULL, NULL);
 }
+
