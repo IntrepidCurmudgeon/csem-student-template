@@ -6,11 +6,13 @@
 # include "sym.h"
 
 #define MAXLINES 80
+#define MAXARGS 80
 
 int labelnum = 0;
 static char quadbuf[4096];
 int numlabels = 0;
 int numblabels = 0;
+int number_of_arguments = 0;
 
 // The following are declared in semutil.c
 extern int formalnum;                  /* number of formal arguments */
@@ -20,6 +22,10 @@ extern int localnum;                   /* number of local variables  */
 extern char localtypes[];              /* types of local variables   */
 extern char localnames[][MAXLINES];    /* names of local variables   */
 extern int localwidths[];              /* widths of local variables  */
+
+// function call arguments
+struct sem_rec *function_arguments[MAXARGS];
+
 
 /*
  * backpatch - backpatch list of quadruples starting at p with k
@@ -43,10 +49,34 @@ void bgnstmt()
  */
 struct sem_rec *call(char *f, struct sem_rec *args)
 {
-    int quadnum = nexttemp();
-    sprintf(quadbuf, "t%d := global %s\n", quadnum, f);
+    if (args == NULL)
+    {
+        if (number_of_arguments != 0)
+            yyerror("call() was passed a null pointer but number_of_arguments wasn't 0");
+    }
+    else
+    {
+        if (number_of_arguments == 0) {
+            number_of_arguments = 1;
+            function_arguments[0] = args;
+        }
+    }
+    for (int i = 0; i < number_of_arguments; i++)
+        printf("argi t%d\n", function_arguments[i]->s_place);
+    struct sem_rec *p;
+    int ftnum = nexttemp();
+    sprintf(quadbuf, "t%d := global %s", ftnum, f);
     printf("%s\n", quadbuf);
-
+    int quadnum = nexttemp();
+    sprintf(quadbuf, "t%d := fi t%d %d ", quadnum, ftnum, number_of_arguments);
+    printf("%s", quadbuf);
+    if (number_of_arguments > 0)
+    {
+        for (int i = 0; i < number_of_arguments; i++)
+            printf("t%d ", function_arguments[i]->s_place);
+        printf("\n");
+    }
+    number_of_arguments = 0;
     return ((struct sem_rec*) NULL);
 }
 
@@ -213,9 +243,20 @@ void endloopscope(int m)
 struct sem_rec *exprs(struct sem_rec *l, struct sem_rec *e)
 {
     //printf("l->s_place: %d\ne->s_place: %d\n", l->s_place, e->s_place);
-    printf("argi t%d\n", l->s_place);
-    printf("argi t%d\n", e->s_place);
-    return ((struct sem_rec *) NULL);
+    //printf("argi t%d\n", l->s_place);
+    //printf("argi t%d\n", e->s_place);
+    if (number_of_arguments == 0)
+    {
+        function_arguments[0] = l;
+        function_arguments[1] = e;
+        number_of_arguments = 2;
+    }
+    else
+    {
+        function_arguments[number_of_arguments] = e;
+        number_of_arguments++;
+    }
+    return l;
 }
 
 /*
