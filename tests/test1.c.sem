@@ -1,167 +1,167 @@
 alloc m 17 24
-func main 1
-localloc i 1 4
-localloc z 1 4
-bgnstmt 7
-t1 := 0
-t2 := global m
-t3 := t2 []i t1
-t4 := 0
-t5 := t3 =i t4
-bgnstmt 8
-t6 := 1
-t7 := global m
-t8 := t7 []i t6
-t9 := 1
-t10 := t8 =i t9
-bgnstmt 9
-t11 := 2
-t12 := global m
-t13 := t12 []i t11
-t14 := 2
-t15 := t13 =i t14
-bgnstmt 10
-t16 := 3
-t17 := global m
-t18 := t17 []i t16
-t19 := 3
-t20 := t18 =i t19
-bgnstmt 11
-t21 := 4
-t22 := global m
-t23 := t22 []i t21
-t24 := 4
-t25 := t23 =i t24
-bgnstmt 12
-t26 := 5
-t27 := global m
-t28 := t27 []i t26
-t29 := 5
-t30 := t28 =i t29
-bgnstmt 13
-t31 := local z 1
-t32 := 10
-t33 := t31 =i t32
-bgnstmt 14
-t34 := local z 1
-t35 := @i t34
-argi t35
-t36 := global scale
-t37 := fi t36 1 t35 
-t38 := 0
-t39 := t37 !=i t38
-bt t39 B1
-br B2
-label L1
-bgnstmt 15
-t40 := local i 0
-t41 := 0
-t42 := t40 =i t41
-label L2
-t43 := local i 0
-t44 := @i t43
-t45 := 6
-t46 := t44 <i t45
-bt t46 B3
-br B4
-label L3
-t47 := local i 0
-t48 := 1
-t49 := @i t47
-t50 := t49 +i t48
-t51 := t47 =i t50
-br B5
-label L4
-bgnstmt 16
-t52 := "m[%d]"
-t53 := local i 0
-t54 := @i t53
-argi t52
-argi t54
-t55 := global printf
-t56 := fi t55 2 t52  t54 
-bgnstmt 17
-t57 := " = %d\n"
-t58 := local i 0
-t59 := @i t58
-t60 := global m
-t61 := t60 []i t59
-t62 := @i t61
-argi t57
-argi t62
-t63 := global printf
-t64 := fi t63 2 t57  t62 
-br B6
-label L5
-B3=L4
-B4=L5
-B5=L2
-B6=L3
-br B7
-label L6
-bgnstmt 20
-t65 := "scale factor is zero\n"
-argi t65
-t66 := global printf
-t67 := fi t66 1 t65 
-label L7
-B1=L1
-B2=L6
-B7=L7
-fend
 func scale 1
 formal x 1 4
 localloc i 1 4
-bgnstmt 26
-t68 := param x 0
-t69 := @i t68
-t70 := 0
-t71 := t69 ==i t70
-bt t71 B8
-br B9
+bgnstmt 6
+t1 := param x 0
+t2 := @i t1
+t3 := 0
+t4 := t2 ==i t3
+bt t4 B1
+br B2
+label L1
+bgnstmt 7
+t5 := 0
+reti t5
+label L2
+B1=L1
+B2=L2
+bgnstmt 8
+t6 := local i 0
+t7 := 0
+t8 := t6 =i t7
+label L3
+t9 := local i 0
+t10 := @i t9
+t11 := 6
+t12 := t10 <i t11
+bt t12 B3
+br B4
+label L4
+t13 := local i 0
+t14 := 1
+t15 := @i t13
+t16 := t15 +i t14
+t17 := t13 =i t16
+br B5
+label L5
+bgnstmt 9
+t18 := local i 0
+t19 := @i t18
+t20 := global m
+t21 := t20 []i t19
+t22 := param x 0
+t23 := @i t22
+t24 := @i t21
+t25 := t24 *i t23
+t26 := t21 =i t25
+br B6
+label L6
+B3=L5
+B4=L6
+B5=L3
+B6=L4
+bgnstmt 10
+t27 := 1
+reti t27
+fend
+func main 1
+localloc i 1 4
+localloc z 1 4
+bgnstmt 17
+t28 := 0
+t29 := global m
+t30 := t29 []i t28
+t31 := 0
+t32 := t30 =i t31
+bgnstmt 18
+t33 := 1
+t34 := global m
+t35 := t34 []i t33
+t36 := 1
+t37 := t35 =i t36
+bgnstmt 19
+t38 := 2
+t39 := global m
+t40 := t39 []i t38
+t41 := 2
+t42 := t40 =i t41
+bgnstmt 20
+t43 := 3
+t44 := global m
+t45 := t44 []i t43
+t46 := 3
+t47 := t45 =i t46
+bgnstmt 21
+t48 := 4
+t49 := global m
+t50 := t49 []i t48
+t51 := 4
+t52 := t50 =i t51
+bgnstmt 22
+t53 := 5
+t54 := global m
+t55 := t54 []i t53
+t56 := 5
+t57 := t55 =i t56
+bgnstmt 23
+t58 := local z 1
+t59 := 10
+t60 := t58 =i t59
+bgnstmt 24
+t61 := local z 1
+t62 := @i t61
+argi t62
+t63 := global scale
+t64 := fi t63 1 t62 
+t65 := 0
+t66 := t64 !=i t65
+bt t66 B7
+br B8
+label L7
+bgnstmt 25
+t67 := local i 0
+t68 := 0
+t69 := t67 =i t68
 label L8
-bgnstmt 27
-t72 := 0
-reti t72
+t70 := local i 0
+t71 := @i t70
+t72 := 6
+t73 := t71 <i t72
+bt t73 B9
+br B10
 label L9
-B8=L8
-B9=L9
-bgnstmt 28
-t73 := local i 0
-t74 := 0
-t75 := t73 =i t74
-label L10
-t76 := local i 0
-t77 := @i t76
-t78 := 6
-t79 := t77 <i t78
-bt t79 B10
+t74 := local i 0
+t75 := 1
+t76 := @i t74
+t77 := t76 +i t75
+t78 := t74 =i t77
 br B11
-label L11
+label L10
+bgnstmt 26
+t79 := "m[%d]"
 t80 := local i 0
-t81 := 1
-t82 := @i t80
-t83 := t82 +i t81
-t84 := t80 =i t83
-br B12
-label L12
-bgnstmt 29
+t81 := @i t80
+argi t79
+argi t81
+t82 := global printf
+t83 := fi t82 2 t79  t81 
+bgnstmt 27
+t84 := " = %d\n"
 t85 := local i 0
 t86 := @i t85
 t87 := global m
 t88 := t87 []i t86
-t89 := param x 0
-t90 := @i t89
-t91 := @i t88
-t92 := t91 *i t90
-t93 := t88 =i t92
+t89 := @i t88
+argi t84
+argi t89
+t90 := global printf
+t91 := fi t90 2 t84  t89 
+br B12
+label L11
+B9=L10
+B10=L11
+B11=L8
+B12=L9
 br B13
-label L13
-B10=L12
-B11=L13
-B12=L10
-B13=L11
+label L12
 bgnstmt 30
-t94 := 1
-reti t94
+t92 := "scale factor is zero\n"
+argi t92
+t93 := global printf
+t94 := fi t93 1 t92 
+label L13
+B7=L7
+B8=L12
+B13=L13
 fend
