@@ -41,7 +41,7 @@ void backpatch(struct sem_rec *p, int k)
 void bgnstmt()
 {
    extern int lineno;
-   fprintf(stdout, "bgntstmt %d\n", lineno);
+   fprintf(stdout, "bgnstmt %d\n", lineno);
 }
 
 /*
@@ -99,7 +99,7 @@ struct sem_rec *ccexpr(struct sem_rec *e)
 
    int trueLabel = ++numblabels;
    int falseLabel = ++numblabels;
-   sprintf(quadbuf, "bt t%d B%d\n", e -> s_place, trueLabel);
+   sprintf(quadbuf, "bt t%d B%d\n", e->s_place, trueLabel);
    fprintf(stdout, "%s", quadbuf);
    sprintf(quadbuf, "br B%d\n", falseLabel);
    fprintf(stdout, "%s", quadbuf);
@@ -321,27 +321,21 @@ void ftail()
  */
 struct sem_rec *id(char *x)
 {
-    /*fprintf(stderr, "sem: id not implemented\n");
-    return ((struct sem_rec *) NULL);
-    struct id_entry *p = lookup(x, 0);
-    return node(labelnum, p->i_type|T_ADDR, 0, 0);
-     */
-
     struct id_entry *p;
     if ((p = lookup(x, 0)) == NULL)
     {
         yyerror("undeclared identifier");
     }
     int quadnum = nexttemp();
-    if (p -> i_scope == GLOBAL)
+    if (p->i_scope == GLOBAL)
         sprintf(quadbuf, "t%d := global %s\n", quadnum, x);
-    else if (p -> i_scope == PARAM)
-        sprintf(quadbuf, "t%d := param %s %d\n", quadnum, x, p -> i_offset);
-    else if (p -> i_scope == LOCAL)
-        sprintf(quadbuf, "t%d := local %s %d\n", quadnum, x, p -> i_offset);
+    else if (p->i_scope == PARAM)
+        sprintf(quadbuf, "t%d := param %s %d\n", quadnum, x, p->i_offset);
+    else if (p->i_scope == LOCAL)
+        sprintf(quadbuf, "t%d := local %s %d\n", quadnum, x, p->i_offset);
 
     fprintf(stdout, "%s", quadbuf);
-    return (node(quadnum, p -> i_type|T_ADDR, NULL, NULL));
+    return (node(quadnum, p->i_type|T_ADDR, NULL, NULL));
 
 }
 
@@ -350,8 +344,13 @@ struct sem_rec *id(char *x)
  */
 struct sem_rec *sindex(struct sem_rec *x, struct sem_rec *i)
 {
-   fprintf(stderr, "sem: sindex not implemented\n");
-   return ((struct sem_rec *) NULL);
+    //fprintf(stderr, "sem: sindex not implemented\n");
+    //return ((struct sem_rec *) NULL);
+    int quadnum = nexttemp();
+    char type = x->s_mode & T_INT ? 'i' : 'f';
+    sprintf(quadbuf, "t%d := t%d []%c t%d", quadnum, x->s_place, type, i->s_place);
+    printf("%s\n", quadbuf);
+    return node(quadnum, x->s_mode, NULL, NULL);
 }
 
 /*
@@ -390,13 +389,13 @@ struct sem_rec *op1(char *op, struct sem_rec *y)
 {
    if (*op == '@')
    {
-       y -> s_mode &= ~T_ADDR;
+       y->s_mode &= ~T_ADDR;
 
        int quadnum = nexttemp();
-       char type = y -> s_mode & T_INT ? 'i' : 'f';
-       sprintf(quadbuf, "t%d := @%c t%d\n", quadnum, type, y -> s_place);
+       char type = y->s_mode & T_INT ? 'i' : 'f';
+       sprintf(quadbuf, "t%d := @%c t%d\n", quadnum, type, y->s_place);
        fprintf(stdout, "%s", quadbuf);
-       return (node(quadnum, y -> s_mode, NULL, NULL));
+       return (node(quadnum, y->s_mode, NULL, NULL));
    }
    else
    {
@@ -413,10 +412,10 @@ struct sem_rec *op2(char *op, struct sem_rec *x, struct sem_rec *y)
    if (*op == '+')
    {
        int quadnum = nexttemp();
-       char type = tsize(x -> s_mode) == 4 ? 'i' : 'f';
+       char type = tsize(x->s_mode) == 4 ? 'i' : 'f';
        sprintf(quadbuf, "t%d = t%d +%c t%d\n", quadnum, x->s_place, type, y->s_place);
        fprintf(stdout, "%s", quadbuf);
-       return node(quadnum, x -> s_mode, NULL, NULL);
+       return node(quadnum, x->s_mode, NULL, NULL);
    }
    else
    {
@@ -441,14 +440,26 @@ struct sem_rec *opb(char *op, struct sem_rec *x, struct sem_rec *y)
  */
 struct sem_rec *rel(char *op, struct sem_rec *x, struct sem_rec *y)
 {
-    if (strcmp(op, ">") == 0)
+    if ((strcmp(op, ">") == 0)  ||
+        (strcmp(op, "<") == 0)  ||
+        (strcmp(op, "==") == 0) ||
+        (strcmp(op, ">=") == 0) ||
+        (strcmp(op, "<=") == 0))
     {
-        char type = x -> s_mode & T_INT ? 'i' : 'f';
+        char type = x->s_mode & T_INT ? 'i' : 'f';
         int quadnum = nexttemp();
-        sprintf(quadbuf, "t%d := t%d %s%c t%d\n", quadnum, x -> s_place, op, type, y -> s_place);
+        sprintf(quadbuf, "t%d := t%d %s%c t%d\n", quadnum, x -> s_place, op, type, y->s_place);
         fprintf(stdout, "%s", quadbuf);
-        return ccexpr(node(quadnum, x -> s_mode, NULL, NULL));
+        return ccexpr(node(quadnum, x->s_mode, NULL, NULL));
     }
+    /*if (strcmp(op, "==") == 0)
+    {
+        char type = x->s_mode & T_INT ? 'i' : 'f';
+        int quadnum = nexttemp();
+        sprintf(quadbuf, "t%d := t%d %s%c t%d\n", quadnum, x -> s_place, op, type, y->s_place);
+        fprintf(stdout, "%s", quadbuf);
+        return ccexpr(node(quadnum, x->s_mode, NULL, NULL));
+    }*/
     else{
         fprintf(stderr, "sem: rel not implemented\n");
         return ((struct sem_rec *) NULL);
@@ -460,19 +471,24 @@ struct sem_rec *rel(char *op, struct sem_rec *x, struct sem_rec *y)
  */
 struct sem_rec *set(char *op, struct sem_rec *x, struct sem_rec *y)
 {
-    if (*op == '\0')
+/*    if (*op == '\0')
     {
         int quadnum = nexttemp();
-        char type = x -> s_mode & T_INT ? 'i' : 'f';
-        sprintf(quadbuf, "t%d := t%d = %c t%d\n", quadnum, x -> s_place, type, y -> s_place);
+        char type = x->s_mode & T_INT ? 'i' : 'f';
+        sprintf(quadbuf, "t%d := t%d =%c t%d\n", quadnum, x->s_place, type, y->s_place);
         fprintf(stdout, "%s", quadbuf);
-        return node(quadnum, x -> s_mode, NULL, NULL);
+        return node(quadnum, x->s_mode, NULL, NULL);
     }
     else
     {
         fprintf(stderr, "sem: set not implemented\n");
         return ((struct sem_rec *) NULL);
-    }
+    }*/
+    int quadnum = nexttemp();
+    char type = x->s_mode & T_INT ? 'i' : 'f';
+    sprintf(quadbuf, "t%d := t%d %s=%c t%d\n", quadnum, x->s_place, op, type, y->s_place);
+    fprintf(stdout, "%s", quadbuf);
+    return node(quadnum, x->s_mode, NULL, NULL);
 }
 
 /*
