@@ -378,8 +378,14 @@ int m()
  */
 struct sem_rec *n()
 {
-   fprintf(stderr, "sem: n not implemented\n");
-   return ((struct sem_rec *) NULL);
+
+    //return (node(quadnum, y->s_mode, NULL, NULL));
+   //else
+   //{
+       fprintf(stderr, "sem: n not implemented\n");
+       return ((struct sem_rec *) NULL);
+   //}
+
 }
 
 /*
@@ -417,13 +423,43 @@ struct sem_rec *op2(char *op, struct sem_rec *x, struct sem_rec *y)
        fprintf(stdout, "%s", quadbuf);
        return node(quadnum, x->s_mode, NULL, NULL);
    }
+   else if (*op == '-')
+   {
+       int quadnum = nexttemp();
+       char type = tsize(x->s_mode) == 4 ? 'i' : 'f';
+       sprintf(quadbuf, "t%d = t%d -%c t%d\n", quadnum, x->s_place, type, y->s_place);
+       fprintf(stdout, "%s", quadbuf);
+       return node(quadnum, x->s_mode, NULL, NULL);
+   }
+   else if (*op == '*')
+   {
+       int quadnum = nexttemp();
+       char type = tsize(x->s_mode) == 4 ? 'i' : 'f';
+       sprintf(quadbuf, "t%d = t%d *%c t%d\n", quadnum, x->s_place, type, y->s_place);
+       fprintf(stdout, "%s", quadbuf);
+       return node(quadnum, x->s_mode, NULL, NULL);
+   }
+   else if (*op == '/')
+   {
+       int quadnum = nexttemp();
+       char type = tsize(x->s_mode) == 4 ? 'i' : 'f';
+       sprintf(quadbuf, "t%d = t%d /%c t%d\n", quadnum, x->s_place, type, y->s_place);
+       fprintf(stdout, "%s", quadbuf);
+       return node(quadnum, x->s_mode, NULL, NULL);
+   }
+   else if (*op == '%')
+   {
+       int quadnum = nexttemp();
+       char type = tsize(x->s_mode) == 4 ? 'i' : 'f';
+       sprintf(quadbuf, "t%d = t%d %%c t%d\n", quadnum, x->s_place, type, y->s_place);
+       fprintf(stdout, "%s", quadbuf);
+       return node(quadnum, x->s_mode, NULL, NULL);
+   }
    else
    {
        fprintf(stderr, "sem: op2 not implemented\n");
        return ((struct sem_rec *) NULL);
    }
-
-
 }
 
 /*
@@ -444,7 +480,8 @@ struct sem_rec *rel(char *op, struct sem_rec *x, struct sem_rec *y)
         (strcmp(op, "<") == 0)  ||
         (strcmp(op, "==") == 0) ||
         (strcmp(op, ">=") == 0) ||
-        (strcmp(op, "<=") == 0))
+        (strcmp(op, "<=") == 0) ||
+        (strcmp(op, "!=") == 0))
     {
         char type = x->s_mode & T_INT ? 'i' : 'f';
         int quadnum = nexttemp();
