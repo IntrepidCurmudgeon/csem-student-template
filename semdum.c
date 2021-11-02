@@ -469,26 +469,30 @@ struct sem_rec *rel(char *op, struct sem_rec *x, struct sem_rec *y)
 /*
  * set - assignment operators
  */
-struct sem_rec *set(char *op, struct sem_rec *x, struct sem_rec *y)
-{
-/*    if (*op == '\0')
+struct sem_rec *set(char *op, struct sem_rec *x, struct sem_rec *y) {
+    int quadnum;
+    char type = x->s_mode & T_INT ? 'i' : 'f';
+    if (*op == '\0')
     {
-        int quadnum = nexttemp();
-        char type = x->s_mode & T_INT ? 'i' : 'f';
+        quadnum = nexttemp();
         sprintf(quadbuf, "t%d := t%d =%c t%d\n", quadnum, x->s_place, type, y->s_place);
-        fprintf(stdout, "%s", quadbuf);
-        return node(quadnum, x->s_mode, NULL, NULL);
     }
     else
+    {
+        struct sem_rec *o = op1("@", x);
+        struct sem_rec *p = op2(op, o, y);
+        quadnum = nexttemp();
+        sprintf(quadbuf, "t%d := t%d =%c t%d\n", quadnum, x->s_place, type, p->s_place);
+    }
+    fprintf(stdout, "%s", quadbuf);
+    return node(quadnum, x->s_mode, NULL, NULL);
+
+
+    /*else
     {
         fprintf(stderr, "sem: set not implemented\n");
         return ((struct sem_rec *) NULL);
     }*/
-    int quadnum = nexttemp();
-    char type = x->s_mode & T_INT ? 'i' : 'f';
-    sprintf(quadbuf, "t%d := t%d %s=%c t%d\n", quadnum, x->s_place, op, type, y->s_place);
-    fprintf(stdout, "%s", quadbuf);
-    return node(quadnum, x->s_mode, NULL, NULL);
 }
 
 /*
