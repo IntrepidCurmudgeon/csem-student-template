@@ -378,14 +378,8 @@ int m()
  */
 struct sem_rec *n()
 {
-
-    //return (node(quadnum, y->s_mode, NULL, NULL));
-   //else
-   //{
-       fprintf(stderr, "sem: n not implemented\n");
-       return ((struct sem_rec *) NULL);
-   //}
-
+    printf("br B%d\n", numlabels);
+    return numlabels;
 }
 
 /*
@@ -523,8 +517,6 @@ struct sem_rec *set(char *op, struct sem_rec *x, struct sem_rec *y) {
     }
     fprintf(stdout, "%s", quadbuf);
     return node(quadnum, x->s_mode, NULL, NULL);
-
-
     /*else
     {
         fprintf(stderr, "sem: set not implemented\n");
