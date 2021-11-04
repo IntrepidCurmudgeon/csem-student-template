@@ -7,12 +7,8 @@ add_definitions(-DLEFTTORIGHT)
 add_definitions(-DSPARC)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(BISON_EXECUTABLE /Users/metadmin/homebrew/opt/bison/bin/bison)
+    set(BISON_EXECUTABLE /usr/local/opt/bison/bin/bison)
 endif()
-
-#if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-#    set(BISON_EXECUTABLE /usr/local/opt/bison/bin/bison)
-#endif()
 
 find_package(BISON)
 BISON_TARGET(MyParser cgram.y ${CMAKE_BINARY_DIR}/cgram.tab.c
