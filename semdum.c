@@ -379,7 +379,7 @@ int m()
 struct sem_rec *n()
 {
     printf("br B%d\n", numlabels);
-    return numlabels;
+    return (node(NULL, NULL, numlabels, NULL));
 }
 
 /*
@@ -394,6 +394,26 @@ struct sem_rec *op1(char *op, struct sem_rec *y)
        int quadnum = nexttemp();
        char type = y->s_mode & T_INT ? 'i' : 'f';
        sprintf(quadbuf, "t%d := @%c t%d\n", quadnum, type, y->s_place);
+       fprintf(stdout, "%s", quadbuf);
+       return (node(quadnum, y->s_mode, NULL, NULL));
+   }
+   else if (*op == '-')
+   {
+       y->s_mode &= ~T_ADDR;
+
+       int quadnum = nexttemp();
+       char type = y->s_mode & T_INT ? 'i' : 'f';
+       sprintf(quadbuf, "t%d := -%c t%d\n", quadnum, type, y->s_place);
+       fprintf(stdout, "%s", quadbuf);
+       return (node(quadnum, y->s_mode, NULL, NULL));
+   }
+   else if (*op == '~')
+   {
+       y->s_mode &= ~T_ADDR;
+
+       int quadnum = nexttemp();
+       char type = y->s_mode & T_INT ? 'i' : 'f';
+       sprintf(quadbuf, "t%d := ~%c t%d\n", quadnum, type, y->s_place);
        fprintf(stdout, "%s", quadbuf);
        return (node(quadnum, y->s_mode, NULL, NULL));
    }
@@ -461,8 +481,51 @@ struct sem_rec *op2(char *op, struct sem_rec *x, struct sem_rec *y)
  */
 struct sem_rec *opb(char *op, struct sem_rec *x, struct sem_rec *y)
 {
-   fprintf(stderr, "sem: opb not implemented\n");
-   return ((struct sem_rec *) NULL);
+    if (*op == '|')
+    {
+        int quadnum = nexttemp();
+        char type = tsize(x->s_mode) == 4 ? 'i' : 'f';
+        sprintf(quadbuf, "t%d = t%d |%c t%d\n", quadnum, x->s_place, type, y->s_place);
+        fprintf(stdout, "%s", quadbuf);
+        return node(quadnum, x->s_mode, NULL, NULL);
+    }
+    else if (*op == '^')
+    {
+        int quadnum = nexttemp();
+        char type = tsize(x->s_mode) == 4 ? 'i' : 'f';
+        sprintf(quadbuf, "t%d = t%d ^%c t%d\n", quadnum, x->s_place, type, y->s_place);
+        fprintf(stdout, "%s", quadbuf);
+        return node(quadnum, x->s_mode, NULL, NULL);
+    }
+    else if (*op == '&')
+    {
+        int quadnum = nexttemp();
+        char type = tsize(x->s_mode) == 4 ? 'i' : 'f';
+        sprintf(quadbuf, "t%d = t%d &%c t%d\n", quadnum, x->s_place, type, y->s_place);
+        fprintf(stdout, "%s", quadbuf);
+        return node(quadnum, x->s_mode, NULL, NULL);
+    }
+    else if ((strcmp(op, ">>") == 0))
+    {
+        int quadnum = nexttemp();
+        char type = tsize(x->s_mode) == 4 ? 'i' : 'f';
+        sprintf(quadbuf, "t%d = t%d >>%c t%d\n", quadnum, x->s_place, type, y->s_place);
+        fprintf(stdout, "%s", quadbuf);
+        return node(quadnum, x->s_mode, NULL, NULL);
+    }
+    else if ((strcmp(op, "<<") == 0))
+    {
+        int quadnum = nexttemp();
+        char type = tsize(x->s_mode) == 4 ? 'i' : 'f';
+        sprintf(quadbuf, "t%d = t%d <<%c t%d\n", quadnum, x->s_place, type, y->s_place);
+        fprintf(stdout, "%s", quadbuf);
+        return node(quadnum, x->s_mode, NULL, NULL);
+    }
+    else
+    {
+        fprintf(stderr, "sem: opb not implemented\n");
+        return ((struct sem_rec *) NULL);
+    }
 }
 
 /*
