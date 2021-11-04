@@ -1,5 +1,6 @@
 # include <stdio.h>
 # include <string.h>
+#include <stdlib.h>
 # include "cc.h"
 # include "semutil.h"
 # include "sem.h"
@@ -206,7 +207,14 @@ void doif(struct sem_rec *e, int m1, int m2)
 void doifelse(struct sem_rec *e, int m1, struct sem_rec *n,
                          int m2, int m3)
 {
-   fprintf(stderr, "sem: doifelse not implemented\n");
+   //fprintf(stderr, "sem: doifelse not implemented\n");
+   sprintf(quadbuf, "B%d=L%d\n", e-> back.s_true->s_place, m1);
+   fprintf(stdout, "%s", quadbuf);
+   sprintf(quadbuf, "B%d=L%d\n", n->s_place, m2);
+   fprintf(stdout, "%s", quadbuf);
+   sprintf(quadbuf, "B%d=L%d\n", e->s_false->s_place, m3);
+   fprintf(stdout, "%s", quadbuf);
+   return;
 }
 
 /*
@@ -378,8 +386,10 @@ int m()
  */
 struct sem_rec *n()
 {
-    printf("br B%d\n", numlabels);
-    return (node(NULL, NULL, numlabels, NULL));
+    struct sem_rec *n = malloc(sizeof (struct sem_rec));
+    printf("br B%d\n", ++numblabels);
+    n->s_place = numblabels;
+    return (node(n->s_place, 0, NULL, NULL));
 }
 
 /*
