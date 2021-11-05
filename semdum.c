@@ -152,7 +152,7 @@ struct sem_rec *con(char *x)
  */
 void dobreak()
 {
-   fprintf(stderr, "sem: dobreak not implemented\n");
+   //fprintf(stderr, "sem: dobreak not implemented\n");
 }
 
 /*
@@ -160,7 +160,7 @@ void dobreak()
  */
 void docontinue()
 {
-   fprintf(stderr, "sem: docontinue not implemented\n");
+   //fprintf(stderr, "sem: docontinue not implemented\n");
 }
 
 /*
@@ -168,7 +168,12 @@ void docontinue()
  */
 void dodo(int m1, int m2, struct sem_rec *e, int m3)
 {
-   fprintf(stderr, "sem: dodo not implemented\n");
+   //fprintf(stderr, "sem: dodo not implemented\n");
+    sprintf(quadbuf, "B%d=L%d\n", e-> back.s_true -> s_place, m1);
+    fprintf(stdout, "%s", quadbuf);
+    sprintf(quadbuf, "B%d=L%d\n", e-> s_false -> s_place, m2);
+    fprintf(stdout, "%s", quadbuf);
+    return;
 }
 
 /*
@@ -177,7 +182,16 @@ void dodo(int m1, int m2, struct sem_rec *e, int m3)
 void dofor(int m1, struct sem_rec *e2, int m2, struct sem_rec *n1,
            int m3, struct sem_rec *n2, int m4)
 {
-   fprintf(stderr, "sem: dofor not implemented\n");
+   //fprintf(stderr, "sem: dofor not implemented\n");
+    sprintf(quadbuf, "B%d=L%d\n", e2-> back.s_true -> s_place, m3);
+    fprintf(stdout, "%s", quadbuf);
+    sprintf(quadbuf, "B%d=L%d\n", e2-> s_false -> s_place, m4);
+    fprintf(stdout, "%s", quadbuf);
+    sprintf(quadbuf, "B%d=L%d\n", n1-> s_place, m1);
+    fprintf(stdout, "%s", quadbuf);
+    sprintf(quadbuf, "B%d=L%d\n", n2-> s_place, m2);
+    fprintf(stdout, "%s", quadbuf);
+    return;
 }
 
 /*
@@ -185,7 +199,8 @@ void dofor(int m1, struct sem_rec *e2, int m2, struct sem_rec *n1,
  */
 void dogoto(char *id)
 {
-   fprintf(stderr, "sem: dogoto not implemented\n");
+   //fprintf(stderr, "sem: dogoto not implemented\n");
+   n();
 }
 
 /*
@@ -234,7 +249,14 @@ void doret(struct sem_rec *e)
 void dowhile(int m1, struct sem_rec *e, int m2, struct sem_rec *n,
              int m3)
 {
-   fprintf(stderr, "sem: dowhile not implemented\n");
+   //fprintf(stderr, "sem: dowhile not implemented\n");
+    sprintf(quadbuf, "B%d=L%d\n", e-> back.s_link-> s_place, m2);
+    fprintf(stdout, "%s", quadbuf);
+    sprintf(quadbuf, "B%d=L%d\n", e-> s_false-> s_place, m3);
+    fprintf(stdout, "%s", quadbuf);
+    sprintf(quadbuf, "B%d=L%d\n", n-> s_place, m1);
+    fprintf(stdout, "%s", quadbuf);
+    return;
 }
 
 /*
@@ -242,7 +264,9 @@ void dowhile(int m1, struct sem_rec *e, int m2, struct sem_rec *n,
  */
 void endloopscope(int m)
 {
-   fprintf(stderr, "sem: endloopscope not implemented\n");
+   //fprintf(stderr, "sem: endloopscope not implemented\n");
+   m = 0;
+   leaveblock();
 }
 
 /*
@@ -556,14 +580,6 @@ struct sem_rec *rel(char *op, struct sem_rec *x, struct sem_rec *y)
         fprintf(stdout, "%s", quadbuf);
         return ccexpr(node(quadnum, x->s_mode, NULL, NULL));
     }
-    /*if (strcmp(op, "==") == 0)
-    {
-        char type = x->s_mode & T_INT ? 'i' : 'f';
-        int quadnum = nexttemp();
-        sprintf(quadbuf, "t%d := t%d %s%c t%d\n", quadnum, x -> s_place, op, type, y->s_place);
-        fprintf(stdout, "%s", quadbuf);
-        return ccexpr(node(quadnum, x->s_mode, NULL, NULL));
-    }*/
     else{
         fprintf(stderr, "sem: rel not implemented\n");
         return ((struct sem_rec *) NULL);
@@ -603,7 +619,10 @@ struct sem_rec *set(char *op, struct sem_rec *x, struct sem_rec *y) {
 void startloopscope()
 {
    /* you may assume the maximum number of loops in a loop nest is 50 */
-   fprintf(stderr, "sem: startloopscope not implemented\n");
+   //fprintf(stderr, "sem: startloopscope not implemented\n");
+   int max_loops = 50;
+
+   enterblock();
 }
 
 /*
