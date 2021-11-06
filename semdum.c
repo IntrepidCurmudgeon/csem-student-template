@@ -78,8 +78,8 @@ struct sem_rec *call(char *f, struct sem_rec *args)
     {
         for (int i = 0; i < number_of_arguments; i++)
             printf("t%d ", function_arguments[i]->s_place);
-        printf("\n");
     }
+    printf("\n");
     number_of_arguments = 0;
     return ((struct sem_rec*) NULL);
 }
