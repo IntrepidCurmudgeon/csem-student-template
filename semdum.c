@@ -34,9 +34,9 @@ struct sem_rec *function_arguments[MAXARGS];
 void backpatch(struct sem_rec *p, int k)
 {
    //fprintf(stderr, "sem: backpatch not implemented\n");
-   struct sem_rec *p2 = NULL;
-   p-> s_place = k;
-   p2-> s_place = k;
+   //struct sem_rec *p2 = NULL;
+   p->s_place = k;
+   //p2-> s_place = k;
 }
 
 /*
@@ -538,7 +538,7 @@ struct sem_rec *op2(char *op, struct sem_rec *x, struct sem_rec *y)
    {
        int quadnum = nexttemp();
        char type = tsize(x->s_mode) == 4 ? 'i' : 'f';
-       sprintf(quadbuf, "t%d = t%d %%c t%d\n", quadnum, x->s_place, type, y->s_place);
+       sprintf(quadbuf, "t%d = t%d %c t%d\n", quadnum, x->s_place, type, y->s_place);
        fprintf(stdout, "%s", quadbuf);
        return node(quadnum, x->s_mode, NULL, NULL);
    }
@@ -651,7 +651,7 @@ struct sem_rec *set(char *op, struct sem_rec *x, struct sem_rec *y) {
         t = node(currtemp(), T_INT, (struct sem_rec *) NULL,
                  (struct sem_rec *) NULL);
     }
-    fprintf(stdout, "%s", quadbuf);
+    //fprintf(stdout, "%s", quadbuf);
 
     if (x-> s_mode & T_INT)
     {
